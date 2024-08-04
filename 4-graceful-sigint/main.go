@@ -13,10 +13,25 @@
 
 package main
 
+import (
+	"fmt"
+	"os"
+	"os/signal"
+)
+
 func main() {
 	// Create a process
 	proc := MockProcess{}
 
-	// Run the process (blocking)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			// sig is a ^C, handle it
+			fmt.Print(sig)
+			proc.Stop()
+		}
+	}()
+
 	proc.Run()
 }
